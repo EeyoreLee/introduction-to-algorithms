@@ -1,5 +1,3 @@
-.datagrand
-.datagrand/
-.test
-.test/
-.test/*
+datagrand
+datagrand/
+test
