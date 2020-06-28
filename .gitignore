@@ -1,2 +1,5 @@
 .datagrand
 .datagrand/
+.test
+.test/
+.test/*
