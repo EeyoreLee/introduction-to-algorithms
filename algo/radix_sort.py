@@ -15,7 +15,7 @@ def randix_sort(lst, r=''):
     for i in range(r):
         buckets = [[] for i in range(10)]
         for j in lst:
-            buckets[j//(10**i)%10].append(j)
+            buckets[j//(10**i) % 10].append(j)
         lst = [_ for b in buckets for _ in b]
     return lst
 
