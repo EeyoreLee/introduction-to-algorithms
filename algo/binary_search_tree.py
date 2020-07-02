@@ -127,8 +127,6 @@ class BinarySearchTree(object):
                     self.pruning()
 
 
-
-
 if __name__ == '__main__':
     # tree = [6, 5, 7, 2, 6, None, 8, 1, 3]
     tree = [15, 6, 18, 3, 7, 17, 20, 2, 4, None, 13, None, None, None, None, None, None, None, None, None, None, 9]
