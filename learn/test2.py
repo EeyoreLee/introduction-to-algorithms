@@ -1,26 +1,13 @@
+import torch
 import numpy as np
+from torch.utils.data import TensorDataset, DataLoader
+a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66, 44, 55, 66])
+
+train_ids = TensorDataset(a, b) 
 
 
-# def forward_v():
-def get_data():
-    data = {}
-    with open('data.txt', 'r', encoding='utf-8') as f:
-        fl = f.read().splitlines()
-        for fl_i in fl:
-            x = ''
-            y = ''
-            for n in range(len(fl_i)//3):
-                x += fl_i[n*3]
-                y += fl_i[n*3+2]
-            data[x] = y
-    return data
+np.pv()
 
-
-def fun_f(y1, y2, x, i):
-    """"""
-
-    return 1
-
-if __name__ == '__main__':
-    get_data()
-    pass
+pass

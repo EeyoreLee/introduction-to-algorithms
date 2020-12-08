@@ -1,5 +1,70 @@
 {
-    "python.pythonPath": "/Users/lichunyu/opt/anaconda3/envs/earlee/bin/python",
+    "python.pythonPath": "/Users/lichunyu/opt/anaconda3/envs/torch-cpu/bin/python",
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "latex-workshop.latex.tools": [
+      {
+          // 编译工具和命令
+          "name": "xelatex",
+          "command": "xelatex",
+          "args": [
+              "-synctex=1",
+              "-interaction=nonstopmode",
+              "-file-line-error",
+              "-pdf",
+              "%DOCFILE%"
+          ]
+      },
+      {
+          "name": "pdflatex",
+          "command": "pdflatex",
+          "args": [
+              "-synctex=1",
+              "-interaction=nonstopmode",
+              "-file-line-error",
+              "%DOCFILE%"
+          ]
+      },
+      {
+          "name": "bibtex",
+          "command": "biber",
+          "args": [
+              "%DOCFILE%"
+          ]
+      }
+  ],
+  "latex-workshop.latex.recipes": [
+      {
+          "name": "xelatex",
+          "tools": [
+              "xelatex"
+          ],
+      },
+      {
+          "name": "pdflatex",
+          "tools": [
+              "pdflatex"
+          ]
+      },
+      {
+          "name": "xe->bib->xe->xe",
+          "tools": [
+              "xelatex",
+              "bibtex",
+              "xelatex",
+              "xelatex"
+          ]
+      },
+      {
+          "name": "pdf->bib->pdf->pdf",
+          "tools": [
+              "pdflatex",
+              "bibtex",
+              "pdflatex",
+              "pdflatex"
+          ]
+      }
+  ],
+    "latex-workshop.message.error.show": false,
+    "latex-workshop.message.warning.show": false
 }
