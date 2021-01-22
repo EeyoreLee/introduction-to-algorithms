@@ -66,5 +66,9 @@
       }
   ],
     "latex-workshop.message.error.show": false,
-    "latex-workshop.message.warning.show": false
+    "latex-workshop.message.warning.show": false,
+    "files.associations": {
+        "cmath": "cpp",
+        "regex": "cpp"
+    }
 }

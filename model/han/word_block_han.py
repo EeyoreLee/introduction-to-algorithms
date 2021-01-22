@@ -8,34 +8,27 @@ import time
 
 from torch import nn
 import torch
-from torch.functional import block_diag
 from torch.nn.modules.activation import Tanh
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.nn.utils.rnn import PackedSequence, pack_padded_sequence, pad_packed_sequence, pack_sequence
+import torch.nn.functional as F
 from torch.optim import AdamW, Adam
+from transformers import BertModel, BertTokenizer, BertForSequenceClassification, BertPreTrainedModel
+# from transformers.models.bert.modeling_bert import BertEmbeddings
+
+
+
+class BertEmbeddings(BertModel):
+    pass
 
 
 class WordAttention(nn.Module):
 
     def __init__(self, vocab_size, embed_dim, gru_hidden_dim, gru_num_layers, dropout, attention_dim):
-        """[summary]
-
-        :param vocab_size: [description]
-        :type vocab_size: [type]
-        :param embed_dim: [description]
-        :type embed_dim: [type]
-        :param gru_hidden_dim: [description]
-        :type gru_hidden_dim: [type]
-        :param gru_num_layers: [description]
-        :type gru_num_layers: [type]
-        :param dropout: [description]
-        :type dropout: [type]
-        :param attention_dim: [description]
-        :type attention_dim: [type]
-        """        
         super(WordAttention, self).__init__()
 
-        self.embeddings = nn.Embedding(vocab_size, embed_dim)
+        # self.embeddings = nn.Embedding(vocab_size, embed_dim)
+        self.bert = BertEmbeddings.from_pretrained('bert-base-uncased')
 
         self.gru = nn.GRU(embed_dim, gru_hidden_dim, num_layers=gru_num_layers, batch_first=True, bidirectional=True, dropout=dropout)
 
@@ -51,12 +44,13 @@ class WordAttention(nn.Module):
 
         # self.clf = nn.Linear(2*gru_hidden_dim, 3)
 
-    def forward(self, blocks, block_lengths):
+    def forward(self, blocks, block_lengths, attention_mask):
 
         block_lengths, perm_idx = block_lengths.sort(dim=0, descending=True)
         blocks = blocks[perm_idx]
 
         blocks = self.embeddings(blocks)
+        # blocks = self.bert(input_ids=blocks).last_hidden_state  # 做了pack paded 不需要attention_mask
         blocks = self.dropout(blocks)
 
         packed_words = pack_padded_sequence(blocks, block_lengths, batch_first=True)
@@ -98,6 +92,25 @@ class BlockAttention(nn.Module):
 
     def __init__(self, vocab_size, embed_dim, word_gru_hidden_dim, word_gru_num_layers, dropout, attention_dim, block_gru_hidden_dim, block_gru_num_layers, \
                 block_attention_dim):
+        """[summary]
+
+        :param vocab_size: [description]
+        :type vocab_size: [type]
+        :param embed_dim: [description]
+        :type embed_dim: [type]
+        :param word_gru_hidden_dim: [description]
+        :type word_gru_hidden_dim: [type]
+        :param word_gru_num_layers: [description]
+        :type word_gru_num_layers: [type]
+        :param dropout: [description]
+        :type dropout: [type]
+        :param attention_dim: [description]
+        :type attention_dim: [type]
+        :param block_gru_hidden_dim: [description]
+        :type block_gru_hidden_dim: [type]
+        :param block_gru_num_layers: [description]
+        :type block_gru_num_layers: [type]
+        """                
         super(BlockAttention, self).__init__()
 
         self.word_attention = WordAttention(vocab_size, embed_dim, word_gru_hidden_dim, word_gru_num_layers, dropout, attention_dim)
@@ -115,7 +128,7 @@ class BlockAttention(nn.Module):
         self.tanh = Tanh()
 
 
-    def forward(self, docs, docs_lengths, blocks_lengths):
+    def forward(self, docs, docs_lengths, blocks_lengths, attention_mask):
         docs_lengths, docs_perm_idx = docs_lengths.sort(dim=0, descending=True)
         docs = docs[docs_perm_idx]
 
@@ -126,7 +139,7 @@ class BlockAttention(nn.Module):
 
         packed_blocks_lengths = pack_padded_sequence(blocks_lengths, lengths=docs_lengths, batch_first=True)
 
-        blocks, word_att_weight = self.word_attention(packed_blocks.data, packed_blocks_lengths.data)
+        blocks, word_att_weight = self.word_attention(packed_blocks.data, packed_blocks_lengths.data, attention_mask)
 
         blocks = self.dropout(blocks)
 
@@ -171,10 +184,11 @@ class WordBlockHierarchicalAttention(nn.Module):
 
         self.clf = nn.Linear(2*block_gru_hidden_dim, num_classes)
 
-    def forward(self, docs, docs_lengths, blocks_lengths):
-        docs, word_att_weight, block_att_weight = self.blocks_attention(docs, docs_lengths, blocks_lengths)
+    def forward(self, docs, docs_lengths, blocks_lengths, attention_mask):
+        docs, word_att_weight, block_att_weight = self.blocks_attention(docs, docs_lengths, blocks_lengths, attention_mask)
 
         scores = self.clf(docs)
+        scores = F.softmax(scores, dim=-1)
 
         return scores, word_att_weight, block_att_weight
 
@@ -185,7 +199,7 @@ class WordBlockHierarchicalAttention(nn.Module):
 
 if __name__ == '__main__':
     # model = WordAttention(vocab_size=30522, embed_dim=512, gru_hidden_dim=512, gru_num_layers=2, dropout=0.1, attention_dim=512)
-    model = WordBlockHierarchicalAttention(vocab_size=50, embed_dim=512, word_gru_hidden_dim=512, word_gru_num_layers=2, dropout=0.1, attention_dim=512, \
+    model = WordBlockHierarchicalAttention(vocab_size=30522, embed_dim=768, word_gru_hidden_dim=512, word_gru_num_layers=2, dropout=0.1, attention_dim=512, \
             block_gru_hidden_dim=512, block_gru_num_layers=2, block_attention_dim=512, num_classes=3)
 
     input = torch.LongTensor([[[1,2,0,0,0],[3,4,5,0,0],[0,0,0,0,0]],
@@ -195,6 +209,11 @@ if __name__ == '__main__':
                               [[2,3,2,0,0],[0,0,0,0,0],[0,0,0,0,0]]])
 
     lengths = torch.LongTensor([2,2,3,1,1])
+    attention_mask = torch.LongTensor([[[1,1,0,0,0],[1,1,1,0,0],[0,0,0,0,0]],
+                                        [[1,1,1,0,0],[1,1,0,0,0],[0,0,0,0,0]],
+                                        [[1,0,0,0,0],[1,1,0,0,0],[1,1,0,0,0]],
+                                        [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
+                                        [[1,1,1,0,0],[0,0,0,0,0],[0,0,0,0,0]]])
 
     words_lengths = torch.LongTensor([[2,3,0],
                                       [3,2,0],
@@ -212,7 +231,7 @@ if __name__ == '__main__':
     for i in range(25):
         batch_loss = 0
         model.zero_grad()
-        logits, word_att_weight, block_att_weight = model(input, lengths, words_lengths)
+        logits, word_att_weight, block_att_weight = model(input, lengths, words_lengths, attention_mask)
         # logits, blocks, att_weights = model(input, lengths)
         print('**************************************')
         print('===========logits========={}'.format(logits))
