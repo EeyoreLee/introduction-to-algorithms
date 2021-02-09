@@ -69,6 +69,7 @@
     "latex-workshop.message.warning.show": false,
     "files.associations": {
         "cmath": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "iostream": "cpp"
     }
 }
