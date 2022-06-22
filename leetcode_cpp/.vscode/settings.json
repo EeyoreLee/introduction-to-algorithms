@@ -6,6 +6,8 @@
         "array": "cpp",
         "unordered_map": "cpp",
         "string_view": "cpp",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "hash_set": "cpp",
+        "unordered_set": "cpp"
     }
 }
