@@ -41,6 +41,9 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "climits": "cpp"
+        "climits": "cpp",
+        "__config": "cpp",
+        "__nullptr": "cpp",
+        "random": "cpp"
     }
 }
