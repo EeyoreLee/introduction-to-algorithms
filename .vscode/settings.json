@@ -45,6 +45,9 @@
         "__config": "cpp",
         "__nullptr": "cpp",
         "random": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "chrono": "cpp",
+        "semaphore": "cpp",
+        "ratio": "cpp"
     }
 }
