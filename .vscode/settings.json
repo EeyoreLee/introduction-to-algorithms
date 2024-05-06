@@ -48,6 +48,13 @@
         "ios": "cpp",
         "chrono": "cpp",
         "semaphore": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "list": "cpp",
+        "__split_buffer": "cpp",
+        "unordered_set": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "__tree": "cpp",
+        "iterator": "cpp"
     }
 }
