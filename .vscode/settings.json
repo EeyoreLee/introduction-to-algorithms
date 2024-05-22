@@ -55,6 +55,9 @@
         "__bit_reference": "cpp",
         "__hash_table": "cpp",
         "__tree": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "stack": "cpp",
+        "__node_handle": "cpp",
+        "queue": "cpp"
     }
 }
